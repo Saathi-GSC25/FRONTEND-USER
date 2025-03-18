@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'package:flutter/gestures.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -25,7 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up"), centerTitle: true),
+      appBar: AppBar(title: const Text("Sign Up")),
       body: Stack(
         children: [
           Padding(
@@ -38,8 +39,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: "Email",
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                   ),
                 ),
@@ -49,8 +51,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: "Password",
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -69,16 +72,26 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _signUp,
-                  child: const Text("Sign Up"),
+                  child: const Text("Register"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF93A6D),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Divider(),
-                const Center(child: Text("Or sign up with")),
+                const SizedBox(height: 10),
+                Row(
+                  children: const [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text("Or Register with"),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -87,10 +100,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       listen: false,
                     ).signInWithGoogle();
                   },
-                  icon: const Icon(Icons.login),
+                  icon: const Icon(Icons.g_mobiledata),
                   label: const Text("Google"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -104,15 +116,34 @@ class _SignupScreenState extends State<SignupScreen> {
             left: 0,
             right: 0,
             child: Center(
-              child: TextButton(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
+              child: RichText(
+                text: TextSpan(
+                  text: "Already have an account? ",
+                  style: const TextStyle(
+                    color: Color(0xFFB0B0B0),
+                  ), // Normal text style
+                  children: [
+                    TextSpan(
+                      text: "Login",
+                      style: const TextStyle(
+                        color: Color(
+                          0xFFF93A6D,
+                        ), // Color for the clickable part
+                        fontWeight: FontWeight.bold,
                       ),
+                      recognizer:
+                          TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
+                            },
                     ),
-                child: const Text("Already have an account? Login"),
+                  ],
+                ),
               ),
             ),
           ),

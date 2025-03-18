@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'screens/auth_checker.dart';
 import 'services/auth_service.dart';
+import 'screens/auth_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,7 +10,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        Provider(create: (_) => AuthService()), // Added AuthService provider
+        ChangeNotifierProvider(
+          create: (_) => AuthService(),
+        ), // Use ChangeNotifierProvider
       ],
       child: const MyApp(),
     ),
@@ -23,8 +25,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const AuthChecker(),
+      title: 'Flutter Auth Demo',
+      home: const AuthChecker(), // Use AuthChecker as the root widget
     );
   }
 }

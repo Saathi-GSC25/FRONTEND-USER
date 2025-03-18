@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
+import 'package:flutter/gestures.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -58,16 +59,18 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: "Email",
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
                     ),
                   ),
                 ),
@@ -77,8 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: "Password",
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                     border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -97,12 +101,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _login,
+                  child: const Text("Login"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF93A6D),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                   ),
-                  child: const Text("Login"),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -110,7 +116,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     Expanded(child: Divider()),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text("Or Login with"),
+                      child: Text(
+                        "Or Login with",
+                        style: TextStyle(
+                          color: Color(0xFFB0B0B0), // Text color
+                        ),
+                      ),
                     ),
                     Expanded(child: Divider()),
                   ],
@@ -134,19 +145,39 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: TextButton(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignupScreen(),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: RichText(
+                text: TextSpan(
+                  text: "Don't have an account? ",
+                  style: const TextStyle(
+                    color: Color(0xFFB0B0B0),
+                  ), // Normal text style
+                  children: [
+                    TextSpan(
+                      text: "Register",
+                      style: const TextStyle(
+                        color: Color(
+                          0xFFF93A6D,
+                        ), // Color for the clickable part
+                        fontWeight: FontWeight.bold,
                       ),
+                      recognizer:
+                          TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignupScreen(),
+                                ),
+                              );
+                            },
                     ),
-                child: const Text("Don't have an account? Register"),
+                  ],
+                ),
               ),
             ),
           ),
