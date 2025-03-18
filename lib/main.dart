@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'services/auth_service.dart';
-import 'screens/auth_checker.dart';
+// import 'screens/auth_checker.dart';
+import 'screens/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,12 @@ void main() async {
   );
 }
 
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//   runApp(const MyApp());
+// }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -26,7 +33,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Auth Demo',
-      home: const AuthChecker(), // Use AuthChecker as the root widget
+      home: const ProfileScreen(),
+      color: Colors.red,
     );
   }
 }
