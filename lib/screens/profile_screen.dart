@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'child_setup.dart';
 
 Future<void> saveUUID(String uuid) async {
   final prefs = await SharedPreferences.getInstance();
@@ -87,6 +88,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           selectedGender = null;
           selectedCategories.clear();
         });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ChildSetupScreen()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error saving profile: ${response.body}")),

@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'home_screen.dart';
 
-class ChildSetupScreen extends StatelessWidget {
+class ChildSetupScreen extends StatefulWidget {
+  @override
+  _ChildSetupScreenState createState() => _ChildSetupScreenState();
+}
+
+class _ChildSetupScreenState extends State<ChildSetupScreen> {
+  bool _isPasswordVisible = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -21,7 +28,7 @@ class ChildSetupScreen extends StatelessWidget {
       // Call Flask backend API
       var response = await http.post(
         Uri.parse(
-          'http://localhost:5000/child-setup',
+          'http://10.0.2.2:5000/child-setup',
         ), // Update with your Flask server URL
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}),
@@ -31,9 +38,9 @@ class ChildSetupScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Credentials submitted successfully!")),
         );
-        Navigator.pushNamed(
+        Navigator.push(
           context,
-          '/profile',
+          MaterialPageRoute(builder: (context) => HomeScreen()),
         ); // Navigate to profile on success
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -58,24 +65,49 @@ class ChildSetupScreen extends StatelessWidget {
           children: [
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: "Email",
-                border: OutlineInputBorder(),
+                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             TextField(
               controller: passwordController,
-              decoration: const InputDecoration(
+              obscureText: !_isPasswordVisible,
+              decoration: InputDecoration(
                 labelText: "Password",
-                border: OutlineInputBorder(),
+                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => submitCredentials(context),
-              child: const Text("Submit"),
+              child: const Text("Save and Next"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF93A6D),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+              ),
             ),
           ],
         ),

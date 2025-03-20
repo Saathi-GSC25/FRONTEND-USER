@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:saathi_user/screens/login_screen.dart';
 import 'services/auth_service.dart';
-// import 'screens/auth_checker.dart';
-import 'screens/profile_screen.dart';
+import 'screens/auth_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +31,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Flutter Auth Demo', home: const LoginScreen());
+    return MaterialApp(title: 'Flutter Auth Demo', home: LoginScreen());
   }
 }
