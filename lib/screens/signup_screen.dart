@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'profile_screen.dart';
 import 'package:flutter/gestures.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -17,10 +18,29 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isPasswordVisible = false;
 
   Future<void> _signUp() async {
-    await Provider.of<AuthService>(
-      context,
-      listen: false,
-    ).signUpWithEmailPassword(_emailController.text, _passwordController.text);
+    try {
+      final user = await Provider.of<AuthService>(
+        context,
+        listen: false,
+      ).signUpWithEmailPassword(
+        _emailController.text,
+        _passwordController.text,
+      );
+
+      if (user != null) {
+        await saveUUID(user.uid); // Save UUID immediately
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        );
+      } else {
+        throw Exception("User object is null");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error during signup: $e")));
+    }
   }
 
   @override

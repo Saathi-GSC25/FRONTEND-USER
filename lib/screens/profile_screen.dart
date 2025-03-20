@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<void> saveUUID(String uuid) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('uuid', uuid);
+  print("UUID saved: $uuid");
+}
+
+Future<String?> getUUID() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('uuid'); // Corrected the key to 'uuid'
+}
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -33,11 +46,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     int age = int.tryParse(ageController.text.trim()) ?? 0;
     String gender = selectedGender ?? '';
     String details = detailsController.text.trim();
+    String? uuid = await getUUID(); // Get the UUID
+    print("Retrieved UUID : $uuid");
 
     if (name.isEmpty ||
         age == 0 ||
         gender.isEmpty ||
-        selectedCategories.isEmpty) {
+        selectedCategories.isEmpty ||
+        uuid == null ||
+        uuid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all required fields")),
       );
@@ -45,30 +62,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     try {
-      await FirebaseFirestore.instance.collection('children').add({
-        'name': name,
-        'age': age,
-        'gender': gender,
-        'categories': selectedCategories, // Save multiple categories
-        'details': details,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile saved successfully!")),
+      var response = await http.post(
+        Uri.parse("http://10.0.2.2:5000/profile"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          'uuid': uuid,
+          'name': name,
+          'age': age,
+          'gender': gender,
+          'categories': selectedCategories,
+          'details': details,
+        }),
       );
 
-      nameController.clear();
-      ageController.clear();
-      detailsController.clear();
-      setState(() {
-        selectedGender = null;
-        selectedCategories.clear();
-      });
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile saved successfully!")),
+        );
+
+        nameController.clear();
+        ageController.clear();
+        detailsController.clear();
+        setState(() {
+          selectedGender = null;
+          selectedCategories.clear();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error saving profile: ${response.body}")),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error saving profile: $e")));
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 

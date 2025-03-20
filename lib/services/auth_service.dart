@@ -14,9 +14,6 @@ class AuthService extends ChangeNotifier {
             email: email.trim(),
             password: password.trim(),
           );
-      print("User Credential: ${userCredential}");
-      print("User: ${userCredential.user}");
-      print("User type: ${userCredential.user.runtimeType}");
       final user = userCredential.user;
       if (user != null) {
         print("Login successful: ${user.email}");
@@ -59,15 +56,12 @@ class AuthService extends ChangeNotifier {
         print("Google sign-in aborted by user.");
         return null;
       }
-
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
-
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
       final UserCredential userCredential = await _auth.signInWithCredential(
         credential,
       );
@@ -89,7 +83,7 @@ class AuthService extends ChangeNotifier {
       }
       await _auth.signOut();
       print("User signed out successfully.");
-      notifyListeners(); // Explicitly notify listeners
+      notifyListeners();
     } catch (e) {
       print("Sign-out error: $e");
     }
