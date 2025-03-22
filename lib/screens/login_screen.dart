@@ -28,13 +28,16 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (user != null) {
+        String uuid = user.uid;
         print("User logged in successfully: ${user.email}");
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Logged in as ${user.email}")));
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(), // Pass UUID here
+          ),
         );
       } else {
         print("Login failed: User is null");

@@ -25,11 +25,8 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
     }
 
     try {
-      // Call Flask backend API
       var response = await http.post(
-        Uri.parse(
-          'http://10.0.2.2:5000/child-setup',
-        ), // Update with your Flask server URL
+        Uri.parse('http://10.0.2.2:5000/child-setup'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}),
       );
@@ -41,7 +38,7 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
-        ); // Navigate to profile on success
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Submission failed! Please try again.")),

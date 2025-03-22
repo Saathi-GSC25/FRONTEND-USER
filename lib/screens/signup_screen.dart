@@ -28,10 +28,10 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (user != null) {
-        await saveUUID(user.uid); // Save UUID immediately
+        await saveUUID(user.uid);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
         );
       } else {
         throw Exception("User object is null");

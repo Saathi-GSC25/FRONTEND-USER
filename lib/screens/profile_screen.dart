@@ -12,7 +12,7 @@ Future<void> saveUUID(String uuid) async {
 
 Future<String?> getUUID() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('uuid'); // Corrected the key to 'uuid'
+  return prefs.getString('uuid');
 }
 
 class ProfileScreen extends StatefulWidget {
@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     int age = int.tryParse(ageController.text.trim()) ?? 0;
     String gender = selectedGender ?? '';
     String details = detailsController.text.trim();
-    String? uuid = await getUUID(); // Get the UUID
+    String? uuid = await getUUID();
     print("Retrieved UUID : $uuid");
 
     if (name.isEmpty ||
