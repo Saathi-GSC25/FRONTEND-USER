@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'login_screen.dart';
 
 Future<String?> getUUID() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? uuid = prefs.getString('uuid'); // Corrected the key to 'uuid'
+  String? uuid = prefs.getString('uuid');
   print("UUID saved: $uuid");
   return uuid;
 }
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int points = 100; // Example state variable
+  int points = 100;
   String? uuid;
 
   @override
@@ -43,9 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 // Pink Background Container (Bottom Layer)
                 Container(
-                  color: const Color(
-                    0xFFFCCBC4,
-                  ).withOpacity(0.8), // Slight opacity
+                  color: const Color(0xFFFCCBC4).withOpacity(0.8),
                   width: double.infinity,
                   height: double.infinity,
                 ),
@@ -94,9 +93,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             IconButton(
                               icon: const Icon(Icons.logout),
                               onPressed: () {
-                                Navigator.pushReplacementNamed(
+                                Navigator.pushAndRemoveUntil(
                                   context,
-                                  '/login',
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginScreen(),
+                                  ),
+                                  (route) => false,
                                 );
                               },
                             ),
@@ -145,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFFFADDC1),
                   const Color(0xFFFFB771),
                   const Color(0xFFFFD1A4),
-                  const Color(0xFFFF8D1D), // Peach
+                  const Color(0xFFFF8D1D),
                 ),
                 _buildFunctionalityButton(
                   'Chat with Aasha',
@@ -153,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFFFAD4C6),
                   const Color(0xFFFFAA8A),
                   const Color(0xFFFBB59B),
-                  const Color(0xFFFF5A1C), // Light Coral
+                  const Color(0xFFFF5A1C),
                 ),
                 _buildFunctionalityButton(
                   'Schedule Calls',
@@ -161,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFFF8EDBD),
                   const Color(0xFFFFE058),
                   const Color(0xFFFFE886),
-                  const Color(0xFFBE9B00), // Light Yellow
+                  const Color(0xFFBE9B00),
                 ),
               ],
             ),
@@ -195,11 +197,11 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
         style: ElevatedButton.styleFrom(
-          elevation: 8, // Shadow effect
+          elevation: 8,
           shadowColor: color2,
-          backgroundColor: color1, // Button color
+          backgroundColor: color1,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Rounded corners
+            borderRadius: BorderRadius.circular(20),
           ),
           padding: const EdgeInsets.all(10),
         ),
@@ -230,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: color4, // Use variable directly without const
+                    color: color4,
                   ),
                 ),
               ),

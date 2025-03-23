@@ -25,9 +25,10 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
-  final TextEditingController detailsController = TextEditingController();
+  final TextEditingController additional_infoController =
+      TextEditingController();
 
-  List<String> categories = [
+  List<String> neuro_cat = [
     "Autism Spectrum Disorder",
     "ADHD",
     "Dyslexia",
@@ -37,23 +38,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "Other",
   ];
 
-  List<String> genders = ["Female", "Male", "Others"];
+  List<String> sexs = ["Female", "Male", "Others"];
 
-  String? selectedGender;
-  List<String> selectedCategories = [];
+  String? selectedsex;
+  List<String> selectedneuro_cat = [];
 
   void saveProfile() async {
     String name = nameController.text.trim();
     int age = int.tryParse(ageController.text.trim()) ?? 0;
-    String gender = selectedGender ?? '';
-    String details = detailsController.text.trim();
+    String sex = selectedsex ?? '';
+    String additional_info = additional_infoController.text.trim();
     String? uuid = await getUUID();
     print("Retrieved UUID : $uuid");
 
     if (name.isEmpty ||
         age == 0 ||
-        gender.isEmpty ||
-        selectedCategories.isEmpty ||
+        sex.isEmpty ||
+        selectedneuro_cat.isEmpty ||
         uuid == null ||
         uuid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,31 +65,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       var response = await http.post(
-        Uri.parse("http://10.0.2.2:5000/profile"),
+        Uri.parse("https://95e1-117-250-237-105.ngrok-free.app/store/child"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          'uuid': uuid,
+          // 'uuid': uuid,
           'name': name,
           'age': age,
-          'gender': gender,
-          'categories': selectedCategories,
-          'details': details,
+          'sex': sex,
+          'neuro_cat': selectedneuro_cat,
+          'additional_info': additional_info,
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profile saved successfully!")),
         );
 
         nameController.clear();
         ageController.clear();
-        detailsController.clear();
+        additional_infoController.clear();
         setState(() {
-          selectedGender = null;
-          selectedCategories.clear();
+          selectedsex = null;
+          selectedneuro_cat.clear();
         });
-        Navigator.push(
+        var data = json.decode(response.body);
+        String cid = data['cid'];
+        print('CID: $cid');
+        await saveCID(cid);
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ChildSetupScreen()),
         );
@@ -171,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedGender,
+                      value: selectedsex,
                       decoration: const InputDecoration(
                         labelText: "How does your child identify?",
                         labelStyle: TextStyle(color: Color(0xFFB0B0B0)),
@@ -188,22 +193,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       items:
-                          genders.map((gender) {
+                          sexs.map((sex) {
                             return DropdownMenuItem<String>(
-                              value: gender,
-                              child: Text(gender),
+                              value: sex,
+                              child: Text(sex),
                             );
                           }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          selectedGender = value;
+                          selectedsex = value;
                         });
                       },
                       style: const TextStyle(color: Colors.black),
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "Which neurodiversity categories best describe your child?",
+                      "Which neurodiversity neuro_cat best describe your child?",
                       style: TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
                     ),
                     const SizedBox(height: 8),
@@ -211,16 +216,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       spacing: 8.0,
                       runSpacing: 8.0,
                       children:
-                          categories.map((category) {
+                          neuro_cat.map((category) {
                             return FilterChip(
                               label: Text(category),
-                              selected: selectedCategories.contains(category),
+                              selected: selectedneuro_cat.contains(category),
                               onSelected: (bool selected) {
                                 setState(() {
                                   if (selected) {
-                                    selectedCategories.add(category);
+                                    selectedneuro_cat.add(category);
                                   } else {
-                                    selectedCategories.remove(category);
+                                    selectedneuro_cat.remove(category);
                                   }
                                 });
                               },
@@ -228,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               backgroundColor: Colors.transparent,
                               labelStyle: TextStyle(
                                 color:
-                                    selectedCategories.contains(category)
+                                    selectedneuro_cat.contains(category)
                                         ? Colors.white
                                         : const Color(0xFFB0B0B0),
                               ),
@@ -237,12 +242,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "Would you like to share any additional details about your child's needs or preferences?",
+                      "Would you like to share any additional additional_info about your child's needs or preferences?",
                       style: TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
                     ),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: detailsController,
+                      controller: additional_infoController,
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
                       decoration: const InputDecoration(

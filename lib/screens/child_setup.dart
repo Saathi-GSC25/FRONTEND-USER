@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
+
+Future<void> saveCID(String cid) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('cid', cid);
+  print("CID saved: $cid");
+}
+
+Future<String?> getCID() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('cid');
+}
 
 class ChildSetupScreen extends StatefulWidget {
   @override
@@ -10,32 +22,39 @@ class ChildSetupScreen extends StatefulWidget {
 
 class _ChildSetupScreenState extends State<ChildSetupScreen> {
   bool _isPasswordVisible = false;
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   void submitCredentials(BuildContext context) async {
-    String email = emailController.text.trim();
+    String username = usernameController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
+    String? cid = await getCID();
 
     try {
-      var response = await http.post(
-        Uri.parse('http://10.0.2.2:5000/child-setup'),
+      print(cid);
+      var response = await http.put(
+        Uri.parse(
+          'https://95e1-117-250-237-105.ngrok-free.app/store/child/${cid}',
+        ),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'password': password}),
+        body: json.encode({
+          'username': username,
+          'password': base64.encode(utf8.encode(password)),
+        }),
       );
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Credentials submitted successfully!")),
         );
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
@@ -61,9 +80,9 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: emailController,
+              controller: usernameController,
               decoration: InputDecoration(
-                labelText: "Email",
+                labelText: "username",
                 labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),

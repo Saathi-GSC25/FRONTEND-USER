@@ -28,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (user != null) {
-        String uuid = user.uid;
         print("User logged in successfully: ${user.email}");
         ScaffoldMessenger.of(
           context,
