@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -46,9 +47,47 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
       body: Stack(
         children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 250,
+              child: Stack(
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/logobg.svg',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                  Positioned(
+                    left: 32,
+                    bottom: 32,
+                    right: 32,
+                    child: const Text(
+                      'Create a new account',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SvgPicture.asset('assets/icons/logo.svg', height: 80),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -139,16 +178,12 @@ class _SignupScreenState extends State<SignupScreen> {
               child: RichText(
                 text: TextSpan(
                   text: "Already have an account? ",
-                  style: const TextStyle(
-                    color: Color(0xFFB0B0B0),
-                  ), // Normal text style
+                  style: const TextStyle(color: Color(0xFFB0B0B0)),
                   children: [
                     TextSpan(
                       text: "Login",
                       style: const TextStyle(
-                        color: Color(
-                          0xFFF93A6D,
-                        ), // Color for the clickable part
+                        color: Color(0xFFF93A6D),
                         fontWeight: FontWeight.bold,
                       ),
                       recognizer:

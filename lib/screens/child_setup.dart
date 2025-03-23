@@ -3,11 +3,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 Future<void> saveCID(String cid) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('cid', cid);
-  print("CID saved: $cid");
+  print("CID saved: \$cid");
 }
 
 Future<String?> getCID() async {
@@ -41,7 +42,7 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
       print(cid);
       var response = await http.put(
         Uri.parse(
-          'https://95e1-117-250-237-105.ngrok-free.app/store/child/${cid}',
+          'https://95e1-117-250-237-105.ngrok-free.app/store/child/\${cid}',
         ),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
@@ -66,67 +67,109 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text("Error: \$e")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Child Setup")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(
-                labelText: "username",
-                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: passwordController,
-              obscureText: !_isPasswordVisible,
-              decoration: InputDecoration(
-                labelText: "Password",
-                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 250,
+              child: Stack(
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/logobg.svg',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                ),
+                  Positioned(
+                    left: 32,
+                    bottom: 32,
+                    right: 32,
+                    child: const Text(
+                      'Setup your child’s Account',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => submitCredentials(context),
-              child: const Text("Save and Next"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF93A6D),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: "Username",
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: passwordController,
+                  obscureText: !_isPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => submitCredentials(context),
+                  child: const Text("Save and Next"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF93A6D),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SvgPicture.asset('assets/icons/logo.svg', height: 80),
+            ),
+          ),
+        ],
       ),
     );
   }

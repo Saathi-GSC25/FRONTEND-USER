@@ -5,6 +5,7 @@ import 'package:saathi_user/screens/login_screen.dart';
 import 'services/auth_service.dart';
 import 'screens/auth_checker.dart';
 import 'screens/child_setup.dart';
+import 'screens/signup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,11 +31,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Auth Demo',
-      initialRoute: '/',
+      initialRoute: '/child',
       routes: {
         '/': (context) => const AuthChecker(),
         '/login': (context) => const LoginScreen(),
         '/child': (context) => ChildSetupScreen(),
+        '/signup': (context) => SignupScreen(),
       },
     );
   }
