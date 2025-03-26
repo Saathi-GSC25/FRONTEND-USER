@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'package:flutter/gestures.dart';
@@ -29,7 +30,8 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (user != null) {
-        await saveUUID(user.uid);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('uuid', user.uid);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ProfileScreen()),

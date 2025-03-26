@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
+import 'dart:convert';
 
 Future<String?> getUUID() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -18,13 +20,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int points = 100;
   String? uuid;
+  Map<String, dynamic>? childDetails;
 
   @override
   void initState() {
     super.initState();
-    loadUUID();
+    loadAndFetchDetails();
+  }
+
+  Future<void> loadAndFetchDetails() async {
+    await loadUUID();
+    if (uuid != null) {
+      getDetails();
+    }
+  }
+
+  Future<void> getDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? sessionCookie = prefs.getString('session_cookie');
+    if (sessionCookie == null) {
+      print("Session cookie not found!");
+      return;
+    }
+    final response = await http.post(
+      Uri.parse('https://7153-14-139-185-115.ngrok-free.app/child/details'),
+      headers: {'Content-Type': 'application/json', 'Cookie': sessionCookie},
+      body: json.encode({'parent_uuid': uuid}),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        childDetails = jsonDecode(response.body);
+      });
+      print('Printing : ${childDetails}');
+    } else {
+      print('Failed to fetch data: ${response.statusCode}');
+    }
   }
 
   Future<void> loadUUID() async {
@@ -82,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  '$points',
+                                  '${childDetails?['points']}',
                                   style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -109,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Hey, check out how ${uuid ?? "loading..."} is doing!',
+                            'Hey, check out how ${childDetails?['name'] ?? "loading..."} is doing!',
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,

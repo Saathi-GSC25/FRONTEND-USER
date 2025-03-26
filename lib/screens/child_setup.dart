@@ -5,26 +5,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-Future<void> saveCID(String cid) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('cid', cid);
-  print("CID saved: \$cid");
-}
-
-Future<String?> getCID() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('cid');
-}
-
 class ChildSetupScreen extends StatefulWidget {
   @override
   _ChildSetupScreenState createState() => _ChildSetupScreenState();
 }
 
 class _ChildSetupScreenState extends State<ChildSetupScreen> {
+  @override
   bool _isPasswordVisible = false;
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  Future<Map<String, String>> getHeaders() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? sessionCookie = prefs.getString('session_cookie');
+
+    return {
+      'Content-Type': 'application/json',
+      if (sessionCookie != null) 'Cookie': sessionCookie, // Attach the cookie
+    };
+  }
 
   void submitCredentials(BuildContext context) async {
     String username = usernameController.text.trim();
@@ -36,15 +36,14 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
       ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
-    String? cid = await getCID();
 
     try {
-      print(cid);
+      var headers = await getHeaders();
       var response = await http.put(
         Uri.parse(
-          'https://95e1-117-250-237-105.ngrok-free.app/store/child/\${cid}',
+          'https://7153-14-139-185-115.ngrok-free.app/parent/child_cred_update',
         ),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers,
         body: json.encode({
           'username': username,
           'password': base64.encode(utf8.encode(password)),
@@ -60,6 +59,7 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
+        print(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Submission failed! Please try again.")),
         );
@@ -67,7 +67,7 @@ class _ChildSetupScreenState extends State<ChildSetupScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: \$e")));
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 

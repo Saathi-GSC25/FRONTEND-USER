@@ -4,17 +4,6 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'child_setup.dart';
 
-Future<void> saveUUID(String uuid) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('uuid', uuid);
-  print("UUID saved: $uuid");
-}
-
-Future<String?> getUUID() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('uuid');
-}
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -28,7 +17,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController additional_infoController =
       TextEditingController();
 
-  List<String> neuro_cat = [
+  List<String> neuro_cats = [
     "Autism Spectrum Disorder",
     "ADHD",
     "Dyslexia",
@@ -41,22 +30,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<String> sexs = ["Female", "Male", "Others"];
 
   String? selectedsex;
-  List<String> selectedneuro_cat = [];
+  List<String> neuro_cat = [];
+  String? uuid;
+
+  @override
+  void initState() {
+    super.initState();
+    getUuid();
+  }
+
+  Future<void> getUuid() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      uuid = prefs.getString('uuid');
+    });
+    print('Loaded UUID: $uuid');
+  }
 
   void saveProfile() async {
     String name = nameController.text.trim();
     int age = int.tryParse(ageController.text.trim()) ?? 0;
     String sex = selectedsex ?? '';
     String additional_info = additional_infoController.text.trim();
-    String? uuid = await getUUID();
-    print("Retrieved UUID : $uuid");
+    print("Retrieved UUID: $uuid");
 
     if (name.isEmpty ||
         age == 0 ||
         sex.isEmpty ||
-        selectedneuro_cat.isEmpty ||
+        neuro_cat.isEmpty ||
         uuid == null ||
-        uuid.isEmpty) {
+        uuid!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all required fields")),
       );
@@ -65,19 +68,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       var response = await http.post(
-        Uri.parse("https://95e1-117-250-237-105.ngrok-free.app/store/child"),
+        Uri.parse(
+          "https://7153-14-139-185-115.ngrok-free.app/parent/child_create",
+        ),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          // 'uuid': uuid,
+          'parent_uuid': uuid,
           'name': name,
           'age': age,
           'sex': sex,
-          'neuro_cat': selectedneuro_cat,
+          'neuro_cat': neuro_cat,
           'additional_info': additional_info,
         }),
       );
 
       if (response.statusCode == 201) {
+        String? sessionCookie = response.headers['set-cookie'];
+        if (sessionCookie != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('session_cookie', sessionCookie);
+          print("Session cookie saved: $sessionCookie");
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profile saved successfully!")),
         );
@@ -87,12 +98,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         additional_infoController.clear();
         setState(() {
           selectedsex = null;
-          selectedneuro_cat.clear();
+          neuro_cat.clear();
         });
-        var data = json.decode(response.body);
-        String cid = data['cid'];
-        print('CID: $cid');
-        await saveCID(cid);
+        print("Going to next screen");
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ChildSetupScreen()),
@@ -208,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "Which neurodiversity neuro_cat best describe your child?",
+                      "Which neurodiversity best describe your child?",
                       style: TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
                     ),
                     const SizedBox(height: 8),
@@ -216,16 +224,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       spacing: 8.0,
                       runSpacing: 8.0,
                       children:
-                          neuro_cat.map((category) {
+                          neuro_cats.map((category) {
                             return FilterChip(
                               label: Text(category),
-                              selected: selectedneuro_cat.contains(category),
+                              selected: neuro_cat.contains(category),
                               onSelected: (bool selected) {
                                 setState(() {
                                   if (selected) {
-                                    selectedneuro_cat.add(category);
+                                    neuro_cat.add(category);
                                   } else {
-                                    selectedneuro_cat.remove(category);
+                                    neuro_cat.remove(category);
                                   }
                                 });
                               },
@@ -233,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               backgroundColor: Colors.transparent,
                               labelStyle: TextStyle(
                                 color:
-                                    selectedneuro_cat.contains(category)
+                                    neuro_cat.contains(category)
                                         ? Colors.white
                                         : const Color(0xFFB0B0B0),
                               ),
