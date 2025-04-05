@@ -29,19 +29,26 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
+      if (!mounted) return;
+
       if (user != null) {
         print("User logged in successfully: ${user.email}");
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('uuid', user.uid);
+
+        if (!mounted) return;
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Logged in as ${user.email}")));
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
         print("Login failed: User is null");
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Login failed. Please check your credentials."),
@@ -50,6 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       print("Login error: $e");
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));

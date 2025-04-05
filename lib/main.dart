@@ -6,7 +6,11 @@ import 'services/auth_service.dart';
 import 'screens/auth_checker.dart';
 import 'screens/child_setup.dart';
 import 'screens/signup_screen.dart';
+import 'screens/task_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/chat_screen.dart';
+import 'screens/report_screen.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -40,6 +44,9 @@ class MyApp extends StatelessWidget {
         '/child': (context) => ChildSetupScreen(),
         '/signup': (context) => SignupScreen(),
         '/profile': (context) => ProfileScreen(),
+        '/task': (context) => TaskManagerScreen(),
+        '/chat': (context) => ChatScreen(),
+        '/report': (context) => ReportScreen(),
       },
     );
   }

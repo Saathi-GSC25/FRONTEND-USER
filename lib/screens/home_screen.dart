@@ -203,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFF69C5FF),
                   const Color(0xFF9CD8FD),
                   const Color(0xFF069DFD),
+                  '/report',
                 ),
                 _buildFunctionalityButton(
                   'Task Manager',
@@ -211,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFFFFB771),
                   const Color(0xFFFFD1A4),
                   const Color(0xFFFF8D1D),
+                  '/task',
                 ),
                 _buildFunctionalityButton(
                   'Chat with Aasha',
@@ -219,6 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFFFFAA8A),
                   const Color(0xFFFBB59B),
                   const Color(0xFFFF5A1C),
+                  '/chat',
                 ),
                 _buildFunctionalityButton(
                   'Schedule Calls',
@@ -227,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color(0xFFFFE058),
                   const Color(0xFFFFE886),
                   const Color(0xFFBE9B00),
+                  '/profile', // Assuming this is the screen for scheduling
                 ),
               ],
             ),
@@ -243,21 +247,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Color color2,
     Color color3,
     Color color4,
+    String routeName, // Add this
   ) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: ElevatedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => Scaffold(
-                    appBar: AppBar(title: Text(text)),
-                    body: Center(child: Text('$text Screen')),
-                  ),
-            ),
-          );
+          Navigator.pushNamed(context, routeName); // Navigate using route name
         },
         style: ElevatedButton.styleFrom(
           elevation: 8,
@@ -270,7 +266,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Stack(
           children: [
-            // SVG inside a rounded square
             Positioned(
               top: 0,
               left: 0,
@@ -284,12 +279,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SvgPicture.asset(svgPath, height: 32, width: 32),
               ),
             ),
-            // Button text positioned a little lower
             Align(
               child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 40,
-                ), // Adjusted text position
+                padding: const EdgeInsets.only(top: 40),
                 child: Text(
                   text,
                   style: TextStyle(
