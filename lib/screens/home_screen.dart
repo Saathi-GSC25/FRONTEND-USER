@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 Future<String?> getUUID() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -31,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadAndFetchDetails() async {
     await loadUUID();
+    print('while loading : ${uuid}');
     if (uuid != null) {
       getDetails();
     }
@@ -39,15 +42,31 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> getDetails() async {
     final prefs = await SharedPreferences.getInstance();
     String? sessionCookie = prefs.getString('session_cookie');
+    final response;
     if (sessionCookie == null) {
-      print("Session cookie not found!");
-      return;
+      print('Printing : ${uuid}');
+      print("Session cookie not found! + ");
+      response = await http.post(
+        Uri.parse('${dotenv.env['BASE_URL']}/common/child_details'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'parent_uuid': uuid}),
+      );
+      print("here");
+      sessionCookie = response.headers['set-cookie'];
+      if (sessionCookie != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('session_cookie', sessionCookie);
+        print("Session cookie saved: $sessionCookie");
+      }
+      print(response.body);
+    } else {
+      print('Printing : ${uuid}');
+      response = await http.post(
+        Uri.parse('${dotenv.env['BASE_URL']}/common/child_details'),
+        headers: {'Content-Type': 'application/json', 'Cookie': sessionCookie},
+        body: json.encode({'parent_uuid': uuid}),
+      );
     }
-    final response = await http.post(
-      Uri.parse('https://7153-14-139-185-115.ngrok-free.app/child/details'),
-      headers: {'Content-Type': 'application/json', 'Cookie': sessionCookie},
-      body: json.encode({'parent_uuid': uuid}),
-    );
 
     if (response.statusCode == 200) {
       setState(() {
@@ -62,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> loadUUID() async {
     String? loadedUUID = await getUUID();
     setState(() {
-      uuid = loadedUUID ?? 'Unknown';
+      uuid = loadedUUID ?? null;
     });
   }
 
@@ -124,7 +143,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.logout),
-                              onPressed: () {
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+
+                                // Firebase sign-out
+                                await FirebaseAuth.instance.signOut();
+
+                                // Clear local storage
+                                await prefs.remove('session_cookie');
+                                await prefs.remove('uuid');
+
+                                if (!context.mounted) return;
+
                                 Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(

@@ -7,8 +7,10 @@ import 'screens/auth_checker.dart';
 import 'screens/child_setup.dart';
 import 'screens/signup_screen.dart';
 import 'screens/profile_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
@@ -32,7 +34,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Auth Demo',
-      initialRoute: '/profile',
       routes: {
         '/': (context) => const AuthChecker(),
         '/login': (context) => const LoginScreen(),

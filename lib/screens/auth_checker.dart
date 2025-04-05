@@ -15,7 +15,7 @@ class AuthChecker extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: authService.authStateChanges,
       builder: (context, snapshot) {
-        print("Auth state changed: ${snapshot.data}"); // Debugging statement
+        print("Auth state changed: ${snapshot.data}");
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

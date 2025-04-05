@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
@@ -30,6 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (user != null) {
         print("User logged in successfully: ${user.email}");
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('uuid', user.uid);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Logged in as ${user.email}")));
