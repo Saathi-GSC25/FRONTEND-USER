@@ -1,0 +1,226 @@
+import 'package:flutter/material.dart';
+import 'package:saathi_user/components/task_screen/htask_card.dart';
+import 'dart:ui';
+import 'package:saathi_user/components/task_screen/top_bar.dart';
+
+class HabitualTasks extends StatefulWidget {
+  final List<Map<String, dynamic>> tasks;
+  const HabitualTasks({super.key, required this.tasks});
+
+  @override
+  State<HabitualTasks> createState() => _HabitualTasksState();
+}
+
+class _HabitualTasksState extends State<HabitualTasks> {
+  void onTap(BuildContext context) {}
+  OverlayEntry? _overlayEntry;
+
+  void _showOverlay(BuildContext context, {Map<String, dynamic>? task}) {
+    if (_overlayEntry != null) return;
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Material(
+        color: Colors.transparent,
+        child: SafeArea(
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTap: () => _hideOverlay(context),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(
+                    color: Colors.black.withAlpha(125)
+                  )
+                )
+              ),
+              Column(
+                children: [
+                  TopBar(),
+                  Expanded(
+                    child: Center(
+                      child: 
+                        HTaskCard(
+                          hideOverlay: _hideOverlay, addTask: addTask, 
+                          updateTask: updateTask, deleteTask: deleteTask,
+                          task: task)
+                    )
+                  )
+                ]
+              )
+            ]
+          )
+        )
+      )
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _hideOverlay(BuildContext context) {
+    if (_overlayEntry != null) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    }
+  }
+
+  void addTask(String from, String to, int points, String title) {
+    setState(() {
+      widget.tasks.add({
+        "task_id": '${widget.tasks.length + 1}',
+        'from': from, 'to': to, 'title': title, 'points': points,
+        'is_done': false
+      });
+    });
+  }
+
+  void updateTask(Map<String, dynamic> task) {
+    for (int i = 0; i < widget.tasks.length; i++) {
+      if (widget.tasks[i]['task_id'] == task['task_id']) {
+        setState( () {
+          widget.tasks[i] = task;
+        });
+      }
+    }
+  }
+
+  void deleteTask(String taskId) {
+    for (int i = 0; i < widget.tasks.length; i++) {
+      if (widget.tasks[i]['task_id'] == taskId) {
+        setState(() {
+          widget.tasks.removeAt(i);
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Color(0xFFFADDC1),
+        borderRadius: BorderRadius.circular(10)
+      ),
+      height: MediaQuery.of(context).size.height * 0.3, 
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Habitual Tasks",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFFFF830A),
+                  fontWeight: FontWeight.bold
+                )
+              ),
+              Row(
+                spacing: 10,
+                children: [
+                  GestureDetector(
+                    onTap: () => onTap(context),
+                    child: 
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFFD1A4),
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: Icon(Icons.edit, color: Color(0xFFFF830A))
+                    )
+                  ),
+                  GestureDetector(
+                    onTap: () => _showOverlay(context),
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFFD1A4),
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: Icon(Icons.add_rounded, color: Color(0xFFFF830A))
+                    )
+                  )
+                ]
+              )
+            ]
+          ),
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.all(8),
+              // padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                // color: Color(0xFFFFD1A4),
+                color: Color(0xFFFADDC1),
+                borderRadius: BorderRadius.circular(10)
+              ),
+              child: widget.tasks.isEmpty
+              ? Center(
+                  child: Text(
+                    "No tasks created yet",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 35,
+                      color: Color(0xFF363636)
+                    )
+                  )
+                )
+              : DefaultTextStyle(
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.black,
+                  ), 
+                  child: SingleChildScrollView(
+                    child: Table(
+                      columnWidths: {
+                        0: IntrinsicColumnWidth(),
+                        1: FlexColumnWidth(),
+                        2: IntrinsicColumnWidth()
+                      },
+                      children: widget.tasks.map<TableRow>(
+                        (row) {
+                          return TableRow(
+                            decoration: BoxDecoration(
+                              color: row['is_done']?Color(0xFFFFD1A4).withAlpha(125):Color(0xFFFFD1A4),
+                            ),
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 8, top: 16, bottom: 16),
+                                child: Text(
+                                  '${row['from']} - ${row['to']}', 
+                                  textAlign: TextAlign.center,
+                                )
+                              ),
+                              Padding(
+                                // padding: EdgeInsets.symmetric(horizontal: 8), 
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                                child: GestureDetector(
+                                  onTap: () => _showOverlay(context, task: row),
+                                  child: Text(row['title'])
+                                )
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(right: 8, top: 16, bottom: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.currency_bitcoin, color: Color(0xFFFF830A)),
+                                    Text('${row['points']}')
+                                  ]
+                                )
+                              )
+                            ]
+                          );
+                        }
+                      ).toList()
+                    )
+                  )
+                )
+            )
+          )
+        ]
+      )
+    );
+  }
+}

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -21,21 +24,54 @@ class _ChatScreenState extends State<ChatScreen> {
         isWaitingForResponse = true;
       });
       _messageController.clear();
-      _getResponse();
+      _getResponse(text);
     }
   }
 
-  Future<void> _getResponse() async {
-    // Simulate a delay for receiving the response
-    await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      // Once response is received, replace the 3 dots with a response message
-      messages.add({
-        "type": "received",
-        "text": "This is the response message!",
-      });
-      isWaitingForResponse = false; // Stop waiting for the response
-    });
+  Future<void> _getResponse(String latest) async {
+
+    Map<String, dynamic> historyData = {
+      "history": messages.map((entry) {
+        return {
+          "role": entry["type"] == "sent" ? "user" : "model",
+          "parts": entry["text"]
+        };
+      }).toList(),
+      "chat": latest
+    };
+
+    // final url = Uri.parse('http://10.0.2.2:9000/chat');  // URL of the API
+    final url = Uri.parse('https://06aa-61-1-180-60.ngrok-free.app/parent/chat_gemini');
+    final headers = {'Content-Type': 'application/json'};
+
+    try {
+      // Convert historyData to JSON string
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(historyData),
+      );
+
+      // Step 3: Handle the response
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // If the server returns a 200 OK response, parse the JSON response
+        final responseData = jsonDecode(response.body);
+        setState(() {
+          messages.add({
+            "type": "received",
+            "text": responseData['text'],
+          });
+        });
+      } else {
+        print('Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+
+    // await Future.delayed(Duration(seconds: 3));
+
+    isWaitingForResponse = false; // Stop waiting for the response
   }
 
   @override
@@ -58,7 +94,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   child: Icon(Icons.message, color: Color(0xFFFF5A1C)),
                 ),
-                // SizedBox(width: 20),
                 Text(
                   "Chat with Aasha",
                   style: TextStyle(
@@ -113,16 +148,26 @@ class _ChatScreenState extends State<ChatScreen> {
                           margin: EdgeInsets.symmetric(vertical: 5),
                           padding: EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width*0.9
+                          ),
                           decoration: BoxDecoration(
                             color: isSent
                                 ? Color(0xFFFFD9B3)
                                 : Color(0x4FFFD19D),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            messages[index]["text"]!,
-                            style: TextStyle(color: Colors.black),
-                          ),
+                          child: isSent
+                            ? Text(
+                                messages[index]["text"]!,
+                                style: TextStyle(color: Colors.black),
+                              )
+                            : MarkdownBody(
+                                data: messages[index]["text"]!,
+                                styleSheet: MarkdownStyleSheet(
+                                  p: TextStyle(color: Colors.black)
+                                ),
+                              )
                         ),
                       );
                     },
