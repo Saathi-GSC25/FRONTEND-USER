@@ -106,23 +106,83 @@ class _HabitualTasksState extends State<HabitualTasks> {
     }
   }
 
-  void updateTask(Map<String, dynamic> task) {
-    for (int i = 0; i < widget.tasks.length; i++) {
-      if (widget.tasks[i]['task_id'] == task['task_id']) {
+  // void updateTask(Map<String, dynamic> task) {
+  //   for (int i = 0; i < widget.tasks.length; i++) {
+  //     if (widget.tasks[i]['task_id'] == task['task_id']) {
+  //       setState(() {
+  //         widget.tasks[i] = task;
+  //       });
+  //     }
+  //   }
+  // }
+
+  void updateTask(Map<String, dynamic> updatedTask) async {
+    print('here');
+    final prefs = await SharedPreferences.getInstance();
+    String? sessionCookie = prefs.getString('session_cookie');
+    if (sessionCookie == null) {
+      print("No session cookie found");
+      return;
+    }
+    print(updatedTask);
+    try {
+      final response = await http.put(
+        Uri.parse("http://35.200.160.97/common/habitual/"),
+        headers: {"Content-Type": "application/json", "Cookie": sessionCookie},
+        body: jsonEncode(updatedTask),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Task updated successfully
         setState(() {
-          widget.tasks[i] = task;
+          for (int i = 0; i < widget.tasks.length; i++) {
+            if (widget.tasks[i]['task_id'] == updatedTask['task_id']) {
+              widget.tasks[i] = updatedTask;
+              break;
+            }
+          }
         });
+        print("Task updated successfully");
+      } else {
+        print("Failed to update task: ${response.statusCode}");
+        print(response.body);
       }
+    } catch (e) {
+      print("Error while updating task: $e");
     }
   }
 
-  void deleteTask(String taskId) {
-    for (int i = 0; i < widget.tasks.length; i++) {
-      if (widget.tasks[i]['task_id'] == taskId) {
+  void deleteTask(String taskId) async {
+    print('here');
+    final prefs = await SharedPreferences.getInstance();
+    String? sessionCookie = prefs.getString('session_cookie');
+    if (sessionCookie == null) {
+      print("No session cookie found");
+      return;
+    }
+    try {
+      final response = await http.delete(
+        Uri.parse("http://35.200.160.97/common/habitual/"),
+        headers: {"Content-Type": "application/json", "Cookie": sessionCookie},
+        body: jsonEncode({'task_id': taskId}),
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Task updated successfully
         setState(() {
-          widget.tasks.removeAt(i);
+          for (int i = 0; i < widget.tasks.length; i++) {
+            if (widget.tasks[i]['task_id'] == taskId) {
+              widget.tasks.removeAt(i);
+              break;
+            }
+          }
         });
+        print("Task delete successfully");
+      } else {
+        print("Failed to delete task: ${response.statusCode}");
+        print(response.body);
       }
+    } catch (e) {
+      print("Error while delete task: $e");
     }
   }
 

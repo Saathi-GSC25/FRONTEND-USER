@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
+  // Handle login with email & password
   Future<void> _login() async {
     try {
       final user = await Provider.of<AuthService>(
@@ -32,23 +33,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (user != null) {
-        print("User logged in successfully: ${user.email}");
+        // Store user ID locally
         final prefs = await SharedPreferences.getInstance();
+        print('user id set');
         await prefs.setString('uuid', user.uid);
 
-        if (!mounted) return;
-
+        // Show success snackbar
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Logged in as ${user.email}")));
 
+        // Navigate to home screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
-        print("Login failed: User is null");
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Login failed. Please check your credentials."),
@@ -56,10 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print("Login error: $e");
-
+      // Show login error
       if (!mounted) return;
-
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -74,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: MediaQuery.of(context).size.width,
         child: Stack(
           children: [
-            // Sign in header at the top
+            // Top header with background and title
             Positioned(
               top: 0,
               left: 0,
@@ -107,14 +105,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // Login form positioned 48px below the header
+            // Login form
             Positioned(
-              top: 250 + 48,
+              top: 298,
               left: 20,
               right: 20,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Email input
                   TextField(
                     controller: _emailController,
                     decoration: const InputDecoration(
@@ -126,6 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
+
+                  // Password input with visibility toggle
                   TextField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
@@ -150,6 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
+
+                  // Login button
                   ElevatedButton(
                     onPressed: _login,
                     child: const Text("Login"),
@@ -162,6 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
+
+                  //"Or Login with"
                   Row(
                     children: const [
                       Expanded(child: Divider()),
@@ -176,6 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
+
+                  // Google login button
                   ElevatedButton.icon(
                     onPressed: () async {
                       await Provider.of<AuthService>(
@@ -195,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // Logo positioned 150px below the header
+            // App logo
             Positioned(
               bottom: 80,
               left: 0,
@@ -205,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // Register text at the bottom of the screen
+            // No account ? Register text
             Positioned(
               bottom: 30,
               left: 0,
@@ -225,6 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         recognizer:
                             TapGestureRecognizer()
                               ..onTap = () {
+                                // Navigate to signup screen
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

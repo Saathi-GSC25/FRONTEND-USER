@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -29,19 +30,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _getResponse(String latest) async {
-
     Map<String, dynamic> historyData = {
-      "history": messages.map((entry) {
-        return {
-          "role": entry["type"] == "sent" ? "user" : "model",
-          "parts": entry["text"]
-        };
-      }).toList(),
-      "chat": latest
+      "history":
+          messages.map((entry) {
+            return {
+              "role": entry["type"] == "sent" ? "user" : "model",
+              "parts": entry["text"],
+            };
+          }).toList(),
+      "chat": latest,
     };
 
-    // final url = Uri.parse('http://10.0.2.2:9000/chat');  // URL of the API
-    final url = Uri.parse('https://06aa-61-1-180-60.ngrok-free.app/parent/chat_gemini');
+    final url = Uri.parse('${dotenv.env['BASE_URL']}/parent/text_chat');
     final headers = {'Content-Type': 'application/json'};
 
     try {
@@ -57,10 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
         // If the server returns a 200 OK response, parse the JSON response
         final responseData = jsonDecode(response.body);
         setState(() {
-          messages.add({
-            "type": "received",
-            "text": responseData['text'],
-          });
+          messages.add({"type": "received", "text": responseData['text']});
         });
       } else {
         print('Failed to load data. Status code: ${response.statusCode}');
@@ -90,7 +87,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Color(0xFFFBB59B),
-                    borderRadius: BorderRadius.circular(10)
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.message, color: Color(0xFFFF5A1C)),
                 ),
@@ -109,69 +106,87 @@ class _ChatScreenState extends State<ChatScreen> {
 
           // Chat Messages Section
           Expanded(
-            child: messages.isEmpty
-                ? Center(
-                    child: Text(
-                      "Hello 👋\nHow can I help you?",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(fontFamily: "Inter", fontSize: 35, color: Colors.blueGrey),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.all(10),
-                    itemCount: messages.length + (isWaitingForResponse ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (isWaitingForResponse && index == messages.length) {
-                        // Display grey bubble with 3 dots while waiting
+            child:
+                messages.isEmpty
+                    ? Center(
+                      child: Text(
+                        "Hello 👋\nHow can I help you?",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontFamily: "Inter",
+                          fontSize: 35,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    )
+                    : ListView.builder(
+                      padding: EdgeInsets.all(10),
+                      itemCount:
+                          messages.length + (isWaitingForResponse ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (isWaitingForResponse && index == messages.length) {
+                          // Display grey bubble with 3 dots while waiting
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 5),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade500,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                "• • •",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        bool isSent = messages[index]["type"] == "sent";
                         return Align(
-                          alignment: Alignment.centerLeft,
+                          alignment:
+                              isSent
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                           child: Container(
                             margin: EdgeInsets.symmetric(vertical: 5),
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.9,
+                            ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade500,
+                              color:
+                                  isSent
+                                      ? Color(0xFFFFD9B3)
+                                      : Color(0x4FFFD19D),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(
-                              "• • •",
-                              style: TextStyle(fontSize: 20, color: Colors.black),
-                            ),
+                            child:
+                                isSent
+                                    ? Text(
+                                      messages[index]["text"]!,
+                                      style: TextStyle(color: Colors.black),
+                                    )
+                                    : MarkdownBody(
+                                      data: messages[index]["text"]!,
+                                      styleSheet: MarkdownStyleSheet(
+                                        p: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
                           ),
                         );
-                      }
-
-                      bool isSent = messages[index]["type"] == "sent";
-                      return Align(
-                        alignment:
-                            isSent ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width*0.9
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSent
-                                ? Color(0xFFFFD9B3)
-                                : Color(0x4FFFD19D),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: isSent
-                            ? Text(
-                                messages[index]["text"]!,
-                                style: TextStyle(color: Colors.black),
-                              )
-                            : MarkdownBody(
-                                data: messages[index]["text"]!,
-                                styleSheet: MarkdownStyleSheet(
-                                  p: TextStyle(color: Colors.black)
-                                ),
-                              )
-                        ),
-                      );
-                    },
-                  ),
+                      },
+                    ),
           ),
 
           // Message Input Box
@@ -179,7 +194,9 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(10.0),
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black), // Border around the entire row
+                border: Border.all(
+                  color: Colors.black,
+                ), // Border around the entire row
                 borderRadius: BorderRadius.circular(10), // Rounded corners
               ),
               child: Row(
@@ -189,7 +206,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _messageController,
                       decoration: InputDecoration(
                         hintText: "Ask anything",
-                        border: InputBorder.none, // No border for the text field
+                        border:
+                            InputBorder.none, // No border for the text field
                         contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       ),
                     ),
