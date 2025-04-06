@@ -3,6 +3,11 @@ import 'package:saathi_user/components/report_screen/conversation_report.dart';
 import 'package:saathi_user/components/report_screen/interests.dart';
 import 'package:saathi_user/components/report_screen/stress_meter.dart';
 import 'package:saathi_user/components/report_screen/top_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -12,16 +17,16 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  Map<String, Object> reportData = {
-    "lastUpdated": "12:34, 18/02/2025",
-    "mood": "Neutral",
+  Map<String, dynamic> reportData = {
+    "last_updated": "12:34, 18/02/2025",
+    "emotion": "neutral",
     "conversations": 13,
     "stress": "Stress Free",
-    "stressReason": "Your child is very happy today !!",
-    "interests": "Reading, Badminton, Football, Swimming",
-    "timeSpent": "4hr 39min",
+    "stressSummary": "Your child is very happy today !!",
+    "interests_summary": "Reading, Badminton, Football, Swimming",
+    "total_duration": "4hr 39min",
 
-    "conversationList": [
+    "conversation_list": [
       {
         "date": "23 March 2025",
         "time": "12:05 PM", "duration": "42 min",
@@ -51,12 +56,49 @@ class _ReportScreenState extends State<ReportScreen> {
       },
     ]
   };
+  // Map<String, dynamic> reportData = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReport();
+  }
+
+  Future<void> fetchReport() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? sessionCookie = prefs.getString('session_cookie');
+    if (sessionCookie == null) {
+      return;
+    }
+
+    try {
+      print("Printing sessionCookie: $sessionCookie");
+      final reportResponse = await http.get(
+        Uri.parse("${dotenv.env['BASE_URL']}/child/fetch_summary"),
+        headers: {'Content-Type': 'application/json', 'Cookie': sessionCookie},
+      );
+      
+      if (reportResponse.statusCode == 200) {
+        setState(() {
+          reportData = jsonDecode(reportResponse.body);
+          print('${reportData['stress']} ${reportData['stress'].length}');
+        });
+      } else {
+        print('Failed to load report');
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
 
   final Map<String, List<Color>> moodColorMap = {
     "Happy": [Color(0xFF5CFD87), Color(0xFF177630)],
-    "Sad": [Color(0xFF9CD8FD), Color(0xFF0060FF)],
-    "Anxious": [Color(0xFFB0B0B0), Color(0xFF000000)],
+    "Sad": [Color(0xFF4682B4), Color(0xFFC7DCFF)],
+    "Fearful": [Color(0xFF483D8B), Color(0xFFE9EDFF)],
     "Angry": [Color(0xFFF5C1C1), Color(0xFFEB4335)], 
+    "Calm": [Color(0xFF87CEEB), Color(0xFF421FDA)],
+    "Disgust": [Color(0xFF6B8E23), Color(0xFFE9FFEA)],
+    "Surprised": [Color(0xFFFFA500), Color(0xFFFFF5E9)],
     "Neutral": [Color(0xFFFFE573), Color(0xFFE78906)]
   };
 
@@ -72,7 +114,7 @@ class _ReportScreenState extends State<ReportScreen> {
             margin: EdgeInsets.all(8),
             alignment: Alignment.topLeft,
             child: Text(
-              'lastUpdated: ${reportData['lastUpdated']}',
+              'lastUpdated: ${reportData['last_updated']}',
               style: TextStyle(
                 fontFamily: "Inter",
                 fontSize: 12,
@@ -112,7 +154,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 width: MediaQuery.of(context).size.width * 0.55,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: moodColorMap[reportData["mood"]]?[0]
+                  color: moodColorMap[reportData["emotion"]]?[0]
                 ),
                 child: Column(
                   children: [
@@ -121,7 +163,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: Text(
                         "Overall Mood",
                         style: TextStyle(
-                          color: moodColorMap[reportData["mood"]]?[1],
+                          color: moodColorMap[reportData["emotion"]]?[1],
                           fontSize: 16,
                           fontWeight: FontWeight.bold
                         )
@@ -132,9 +174,9 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          '${reportData["mood"]}',
+                          '${reportData["emotion"]}',
                           style: TextStyle(
-                            color: moodColorMap[reportData["mood"]]?[1],
+                            color: moodColorMap[reportData["emotion"]]?[1],
                             fontWeight: FontWeight.bold,
                             fontSize: 24
                           )
@@ -227,7 +269,7 @@ class _ReportScreenState extends State<ReportScreen> {
                             child: Align(
                               alignment: Alignment.center,
                               child: Text(
-                                reportData["timeSpent"].toString(),
+                                reportData["total_duration"].toString(),
                                 style: TextStyle(
                                   color: Color(0xFF363636),
                                   fontWeight: FontWeight.bold,

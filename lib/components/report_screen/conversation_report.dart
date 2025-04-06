@@ -48,7 +48,7 @@ class _ConversationReportState extends State<ConversationReport> {
             ),
             Expanded( child: Container(
               color: Color(0xFFC6E9FF),
-              child: widget.reportData['conversationList'].isEmpty
+              child: widget.reportData['conversation_list'].isEmpty
               ? Center(
                   child: Text(
                     "No conversations yet",
@@ -60,9 +60,9 @@ class _ConversationReportState extends State<ConversationReport> {
                   )
                 ) 
               : ListView.builder(
-                itemCount: widget.reportData['conversationList'].length,
+                itemCount: widget.reportData['conversation_list'].length,
                 itemBuilder: (context, index) {
-                  return ConversationCard(convInfo: widget.reportData['conversationList'][index]);
+                  return ConversationCard(convInfo: widget.reportData['conversation_list'][index]);
                 },
               )
             ))

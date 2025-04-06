@@ -73,7 +73,7 @@ class _InterestsState extends State<Interests> {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Text(
-                                  widget.reportData["interests"].toString(),
+                                  widget.reportData["interests_summary"].toString(),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 24,

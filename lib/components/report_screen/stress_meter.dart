@@ -12,7 +12,7 @@ class StressMeterWidget extends StatefulWidget {
 
 class _StressMeterWidgetState extends State<StressMeterWidget> {
   final Map<String, List<Color>> stressColorMap = {
-    "Stress Free": [Color(0xFF5CFD87), Color(0xFF177630)],
+    "Stressless": [Color(0xFF5CFD87), Color(0xFF177630)],
     "High": [Color(0xFFF5C1C1), Color(0xFFEB4335)],
     "Low": [Color(0xFFFFE573), Color(0xFFE78906)],
     "Moderate": [Color(0xFFF9C593), Color(0xFFFF5A1C)]
@@ -79,7 +79,7 @@ class _StressMeterWidgetState extends State<StressMeterWidget> {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Text(
-                                  widget.reportData["stressReason"].toString(),
+                                  widget.reportData["stressSummary"].toString(),
                                   style: TextStyle(
                                     color: stressColorMap[widget.reportData["stress"]]?[1],
                                     fontSize: 24,
